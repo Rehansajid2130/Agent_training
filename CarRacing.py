@@ -1,18 +1,32 @@
+import os
 import gymnasium as gym
 import numpy as np
 import pygame
 from stable_baselines3 import PPO
 
-print("Training CarRacing....")
-test_env = gym.make("CarRacing-v3"  )
+MODEL_PATH = "ppo_carracing.zip"
+TRAIN_MORE = False
 
-# normal reset, this changes the colour scheme by default
-
-model = PPO("CnnPolicy",test_env,verbose=1)
-model.learn(total_timesteps=20000)
-
-test_env.close()
-print("Testing completed")
+if os.path.exists(MODEL_PATH):
+    print("Model data found")
+    if TRAIN_MORE:
+        train_env = gym.make("CarRacing-v3")
+        model = PPO.load(MODEL_PATH, env=train_env)
+        print("Training CarRacing....")
+        model.learn(total_timesteps=50000)
+        model.save(MODEL_PATH)
+        train_env.close()
+        print("Training completed")
+    else:
+        model = PPO.load(MODEL_PATH)
+else:
+    print("Training CarRacing....")
+    train_env = gym.make("CarRacing-v3")
+    model = PPO("CnnPolicy", train_env, verbose=1)
+    model.learn(total_timesteps=50000)
+    model.save(MODEL_PATH)
+    train_env.close()
+    print("Training completed")
 
 total_reward = 0
 # reset with colour scheme change

@@ -1,16 +1,30 @@
-# Run `pip install "gymnasium[classic-control]"` for this example.
+import os
 import gymnasium as gym
 from stable_baselines3 import PPO
-# Create our training environment - a cart with a pole that needs balancing
-# env = gym.make("CartPole-v1", render_mode="human")
-print("Training model")
-train_evn = gym.make("CartPole-v1")
 
-model = PPO("MlpPolicy",train_evn,verbose=1)
+MODEL_PATH = "ppo_cartpole.zip"
+TRAIN_MORE = False
 
-model.learn(total_timesteps=500)
-train_evn.close()
-print("Training complete")
+if os.path.exists(MODEL_PATH):
+    print("Model data found")
+    if TRAIN_MORE:
+        train_env = gym.make("CartPole-v1")
+        model = PPO.load(MODEL_PATH, env=train_env)
+        print("Training model")
+        model.learn(total_timesteps=25000)
+        model.save(MODEL_PATH)
+        train_env.close()
+        print("Training complete")
+    else:
+        model = PPO.load(MODEL_PATH)
+else:
+    print("Training model")
+    train_env = gym.make("CartPole-v1")
+    model = PPO("MlpPolicy", train_env, verbose=1)
+    model.learn(total_timesteps=25000)
+    model.save(MODEL_PATH)
+    train_env.close()
+    print("Training complete")
 
 # Reset environment to start a new episode
 # observation, info = env.reset()
