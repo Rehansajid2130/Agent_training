@@ -3,7 +3,7 @@ import gymnasium as gym
 from stable_baselines3 import PPO
 
 MODEL_PATH = "ppo_cartpole.zip"
-TRAIN_MORE = False
+TRAIN_MORE = True
 
 if os.path.exists(MODEL_PATH):
     print("Model data found")
@@ -36,7 +36,7 @@ print("Testing the training model..")
 # [cart_position, cart_velocity, pole_angle, pole_angular_velocity]
 test_env= gym.make("CartPole-v1",render_mode="human")
 
-for episode in range(10):
+for episode in range(5):
     observation, _ = test_env.reset()
     episode_over = False
     total_reward = 0
