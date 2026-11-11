@@ -1,0 +1,23 @@
+{
+    "experiment_duration_s": 252.95,
+    "total_frames": 1566,
+    "detected_frames": 1566,
+    "detection_rate_pct": 100.0,
+    "centered_frames": 749,
+    "centering_success_pct": 47.83,
+    "distance_ok_frames": 1566,
+    "distance_maintenance_pct": 100.0,
+    "stable_following_frames": 749,
+    "stable_following_pct": 47.83,
+    "mean_absolute_horizontal_error_px": 26.077,
+    "mean_absolute_radius_error_px": 2.475,
+    "target_loss_events": 0,
+    "completed_reacquisitions": 0,
+    "mean_reacquisition_time_s": null,
+    "evaluation_thresholds": {
+        "image_center_x_px": 320,
+        "target_radius_px": 85,
+        "center_tolerance_px": 25,
+        "radius_tolerance_px": 10
+    }
+}

@@ -14,7 +14,7 @@ MODEL_PATH = "ppo_carracing.zip"
 # "MANUAL" -> Drive yourself with arrow keys (Up=Gas, Down=Brake, Left/Right=Steer)
 # "TRAIN"  -> Train the AI with 4 parallel tracks at high FPS
 # =============================================================
-MODE = "TRAIN"
+MODE = "WATCH"
 
 TIMESTEPS_TO_TRAIN = 100000  # Steps to train if MODE == "TRAIN"
 NUM_PARALLEL_ENVS = 4        # Parallel environments for fast CPU training
