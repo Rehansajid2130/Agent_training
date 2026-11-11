@@ -16,13 +16,22 @@ This project implements, evaluates, and tunes reinforcement learning agents acro
 
 ## 🎮 The Environments
 
-### 1. 🕹️ CartPole (`CartPole.py`)
+### 1. 🕹️ CartPole (`CartPole.py`) - SOLVED 🎉
 - **Objective:** Balance a vertical pole hinged to a cart moving along a frictionless track.
 - **Observation Space:** 4 continuous variables:
   - Cart Position, Cart Velocity, Pole Angle, Pole Angular Velocity.
 - **Action Space:** Discrete (2 actions: Push Left `0` or Push Right `1`).
 - **Reward:** `+1` for every frame the pole stays upright (within ~12°).
 - **Result:** Fully solved using PPO (`MlpPolicy`), reaching the maximum possible score of **500.0**.
+
+#### 🎬 Balancing Demo:
+https://github.com/user-attachments/assets/CartPole.mp4
+
+<p align="center">
+  <video src="CartPole.mp4" width="100%" controls autoplay loop muted></video>
+</p>
+
+> 📹 **Direct video link:** [Watch CartPole.mp4](CartPole.mp4)
 
 ---
 
@@ -88,6 +97,7 @@ AI_training/
 ├── LunarLander.py              # LunarLander training, checkpointing & evaluation
 ├── CarRacing.py                # CarRacing simulation (Manual keyboard & PPO agent)
 ├── ppo_lunar_lander.zip        # Trained PPO neural network weights for LunarLander
+├── CartPole.mp4                # Video recording of CartPole balancing
 ├── LanderLanding_perfect.mp4   # Video recording of the solved landing between flags
 └── README.md                   # Project documentation
 ```
