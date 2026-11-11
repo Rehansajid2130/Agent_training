@@ -13,7 +13,7 @@ if os.path.exists(MODEL_PATH):
         train_env = gym.make("CarRacing-v3")
         model = PPO.load(MODEL_PATH, env=train_env)
         print("Training CarRacing....")
-        model.learn(total_timesteps=50000)
+        model.learn(total_timesteps=150000)
         model.save(MODEL_PATH)
         train_env.close()
         print("Training completed")

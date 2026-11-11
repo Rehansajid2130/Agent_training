@@ -4,7 +4,7 @@ import os
 from stable_baselines3 import PPO
 
 MODEL_PATH ="ppo_lunar_lander.zip"
-TRAIN_MORE = True
+TRAIN_MORE = False
 
 if os.path.exists(MODEL_PATH):
     print("Model data found")
@@ -13,7 +13,7 @@ if os.path.exists(MODEL_PATH):
         model = PPO.load(MODEL_PATH,env=train_env)
 
         print("Training LunarLander..")
-        model.learn(total_timesteps=150000)
+        model.learn(total_timesteps=360000)
         model.save("ppo_lunar_lander.zip")
 
         train_env.close()
@@ -24,7 +24,7 @@ if os.path.exists(MODEL_PATH):
 else:
     print("no model found")
     train_env = gym.make("LunarLander-v3")
-    model = PPO("MlpPolicy", train_env)
+    model = PPO("MlpPolicy", train_env , gamma = 0.999, ent_coef=0.01 , verbose =1)
     model.learn(total_timesteps=15000)
     model.save(MODEL_PATH)
     train_env.close()
