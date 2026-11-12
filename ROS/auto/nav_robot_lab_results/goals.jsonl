@@ -1,0 +1,18 @@
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "FAILED_STATUS_6", "elapsed_wall_s": 6.78, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "FAILED_STATUS_6", "elapsed_wall_s": 3.61, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "FAILED_STATUS_6", "elapsed_wall_s": 0.43, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 12.38, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "FAILED_STATUS_6", "elapsed_wall_s": 23.15, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "REJECTED", "elapsed_wall_s": 0.0, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "FAILED_STATUS_6", "elapsed_wall_s": 2.65, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 11.53, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "FAILED_STATUS_6", "elapsed_wall_s": 2.29, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 9.41, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 1.35, "y": 0.0, "yaw": 0.0, "status": "FAILED_STATUS_6", "elapsed_wall_s": 6.23, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 0.0, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 17.93, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 1.35, "y": 0.0, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 15.4, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": -0.2, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 15.53, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows.", "run": "arena-five-goals.w4toMH", "goal": 1}
+{"x": 1.4, "y": -0.4, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 11.39, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows.", "run": "arena-five-goals.w4toMH", "goal": 2}
+{"x": 1.0, "y": 0.8, "yaw": 1.5708, "status": "SUCCEEDED", "elapsed_wall_s": 31.57, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows.", "run": "arena-five-goals.w4toMH", "goal": 3}
+{"x": 0.8, "y": 1.8, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 27.48, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows.", "run": "arena-five-goals.w4toMH", "goal": 4}
+{"x": 2.8, "y": -0.6, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 52.7, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows.", "run": "arena-five-goals.w4toMH", "goal": 5}

@@ -1,0 +1,5 @@
+{"x": 0.8, "y": -0.2, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 15.53, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 1.4, "y": -0.4, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 11.39, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 1.0, "y": 0.8, "yaw": 1.5708, "status": "SUCCEEDED", "elapsed_wall_s": 31.57, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 0.8, "y": 1.8, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 27.48, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}
+{"x": 2.8, "y": -0.6, "yaw": 0.0, "status": "SUCCEEDED", "elapsed_wall_s": 52.7, "note": "Wall-clock time; sim time may differ when WSL/Gazebo slows."}

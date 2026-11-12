@@ -1,0 +1,13 @@
+{
+  "map_width_cells": 187,
+  "map_height_cells": 147,
+  "resolution_m_per_cell": 0.05000000074505806,
+  "known_area_m2": 35.83,
+  "known_free_area_m2": 34.38,
+  "cell_counts": {
+    "unknown": 13159,
+    "free": 13752,
+    "occupied": 578
+  },
+  "map_updates": 195
+}

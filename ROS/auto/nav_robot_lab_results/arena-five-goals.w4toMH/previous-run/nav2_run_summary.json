@@ -1,0 +1,10 @@
+{
+  "experiment_csv": "/home/rehan/nav_robot_lab_results/nav2_run.csv",
+  "odom_samples": 2637,
+  "scan_samples": 844,
+  "duration_s": 105.45,
+  "distance_traveled_m": 1.125,
+  "minimum_observed_lidar_clearance_m": 0.6402289271354675,
+  "lidar_samples_under_0_30_m": 0,
+  "note": "Proximity is a LiDAR-based proxy, NOT a collision count. Goals are evaluated separately."
+}
