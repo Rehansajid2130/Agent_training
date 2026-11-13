@@ -1,6 +1,6 @@
-# 🤖 Autonomous Agents & Robotics: Deep RL + ROS 2 Gazebo
+# 🤖 Autonomous Agents & Robotics: Deep RL + ROS 2 + Kinematics
 
-A unified portfolio repository combining **Deep Reinforcement Learning** (using **Gymnasium**, **PyTorch**, and **Stable-Baselines3**) with **Vision-Based Autonomous Mobile Robotics** (using **ROS 2 Jazzy**, **Gazebo Harmonic**, and **OpenCV**).
+A comprehensive portfolio repository combining **Deep Reinforcement Learning** (using **Gymnasium**, **PyTorch**, and **Stable-Baselines3**), **Autonomous Mobile Robotics & SLAM** (using **ROS 2 Jazzy**, **Gazebo Harmonic**, **Nav2**, and **OpenCV**), and **Robotic Kinematics & Interactive Control**.
 
 ---
 
@@ -16,12 +16,15 @@ A unified portfolio repository combining **Deep Reinforcement Learning** (using 
   - [System Architecture](#system-architecture)
   - [ROS 2 Interfaces & Simulation World](#ros-2-interfaces--simulation-world)
   - [Preliminary Run 1 Quantitative Results](#preliminary-run-1-quantitative-results)
-  - [How to Run the ROS 2 Simulation](#how-to-run-the-ros-2-simulation)
-- [Part III: Autonomous Robot Navigation & SLAM (Nav2 + Gazebo)](#-part-iii-autonomous-robot-navigation--slam-ros-2-jazzy--nav2--slam-toolbox)
+  - [How to Run the Ball Follower Simulation](#how-to-run-the-ball-follower-simulation)
+- [Part III: Autonomous Robot Navigation & SLAM (Nav2 + SLAM Toolbox)](#-part-iii-autonomous-robot-navigation--slam-ros-2-jazzy--nav2--slam-toolbox)
   - [Mission Trajectory & Occupancy Map](#mission-trajectory--occupancy-map)
   - [5-Waypoint Navigation Benchmark](#5-waypoint-navigation-benchmark)
   - [Navigation Architecture & Telemetry](#navigation-architecture--telemetry)
   - [How to Run Autonomous Navigation](#how-to-run-autonomous-navigation)
+- [Part IV: Two-Joint Robot Arm Kinematics & Interactive Control](#-part-iv-two-joint-robot-arm-kinematics--interactive-control)
+  - [Forward Kinematics & Target Acquisition](#forward-kinematics--target-acquisition)
+  - [Demonstrations](#demonstrations)
 - [Repository Structure](#-repository-structure)
 - [Installation & Setup](#%EF%B8%8F-installation--setup)
 - [Summary of Results](#-summary-of-results)
@@ -31,13 +34,14 @@ A unified portfolio repository combining **Deep Reinforcement Learning** (using 
 
 ## 📌 Project Overview
 
-This repository houses four end-to-end autonomous agent projects across two major domains:
+This repository is organized into dedicated, self-contained project folders across three domains:
 
-1. **CartPole-v1 (`CartPole.py`)**: Inverted pendulum stabilization using PPO (`MlpPolicy`) over 4D state vectors.
-2. **LunarLander-v3 (`LunarLander.py`)**: Rocket thruster control, hyperparameter tuning (`gamma=0.999`, `ent_coef=0.01`), and persistent model training to land safely between target flags.
-3. **CarRacing-v3 (`CarRacing.py`)**: Continuous track driving from raw $96 \times 96 \times 3$ RGB frames using a Nature-CNN backbone, frame stacking, parallel vectorization, and reward-hacking prevention.
-4. **ROS 2 Ball-Following Robot (`ROS/Ball_detection/`)**: A simulated differential-drive robot (`follower_bot`) in **Gazebo Harmonic** streaming RGB camera images to **ROS 2 Jazzy**, detecting a moving red spherical target (`red_ball`) via OpenCV HSV thresholding, and closing the visual-feedback loop via `/cmd_vel`.
-5. **Autonomous Robot Navigation & SLAM (`ROS/auto/`)**: Full autonomous mobile robot stack featuring **Nav2 (Navigation2)**, **SLAM Toolbox**, 2D LiDAR costmaps, and obstacle avoidance navigating a multi-waypoint arena with 100% mission success.
+1. **[CartPole](CartPole/)**: Inverted pendulum stabilization using PPO (`MlpPolicy`) over 4D state vectors. Reaches maximum possible score of **500.0**.
+2. **[LunarLander](LunarLander/)**: Continuous-physics rocket landing using PPO with long-horizon discount tuning ($\gamma=0.999$, `ent_coef=0.01`). Reaches **+200 to +280+**.
+3. **[CarRacing](CarRacing/)**: Vision-based racecar control from raw $96 \times 96 \times 3$ RGB pixels using a Nature-CNN backbone, 4-frame stacking, and an anti-suicide reward wrapper. Scores **+150 to +250+**.
+4. **[ROS_Ball_Detection](ROS_Ball_Detection/)**: Differential-drive robot (`follower_bot`) in **Gazebo Harmonic** streaming front RGB images to **ROS 2 Jazzy**, detecting a dynamic red ball via OpenCV HSV thresholding, and closing the visual control loop.
+5. **[ROS_Autonomous_Nav](ROS_Autonomous_Nav/)**: Complete mobile robot navigation stack with **Nav2 (Navigation2)**, **SLAM Toolbox**, 2D LiDAR costmaps, and collision avoidance navigating a 5-waypoint arena with **100% mission success**.
+6. **[Two_Joint_Robot_Arm](Two_Joint_Robot_Arm/)**: Interactive 2-DOF planar robotic manipulator featuring forward kinematics, joint angle slider controls, and real-time end-effector tip tracking.
 
 ---
 
@@ -54,10 +58,10 @@ This repository houses four end-to-end autonomous agent projects across two majo
 https://github.com/user-attachments/assets/CartPole.mp4
 
 <p align="center">
-  <video src="CartPole.mp4" width="100%" controls autoplay loop muted></video>
+  <video src="CartPole/CartPole.mp4" width="85%" controls autoplay loop muted></video>
 </p>
 
-> 📹 **Direct video link:** [Watch CartPole.mp4](CartPole.mp4)
+> 📹 **Direct video link:** [Watch CartPole.mp4](CartPole/CartPole.mp4)
 
 ---
 
@@ -75,10 +79,10 @@ https://github.com/user-attachments/assets/CartPole.mp4
 https://github.com/user-attachments/assets/LanderLanding_perfect.mp4
 
 <p align="center">
-  <video src="LanderLanding_perfect.mp4" width="100%" controls autoplay loop muted></video>
+  <video src="LunarLander/LanderLanding_perfect.mp4" width="85%" controls autoplay loop muted></video>
 </p>
 
-> 📹 **Direct video link:** [Watch LanderLanding_perfect.mp4](LanderLanding_perfect.mp4)
+> 📹 **Direct video link:** [Watch LanderLanding_perfect.mp4](LunarLander/LanderLanding_perfect.mp4)
 
 ---
 
@@ -86,7 +90,7 @@ https://github.com/user-attachments/assets/LanderLanding_perfect.mp4
 
 #### 🎬 Autonomous Driving Demo:
 <p align="center">
-  <img src="carracing_trained_demo.gif" alt="Trained CarRacing Agent Demo" width="60%">
+  <img src="CarRacing/carracing_trained_demo.gif" alt="Trained CarRacing Agent Demo" width="60%">
 </p>
 
 #### 🔴 The Problem & Challenges
@@ -132,7 +136,7 @@ https://github.com/user-attachments/assets/LanderLanding_perfect.mp4
 
 #### 📈 Learning-Curve Analysis
 <p align="center">
-  <img src="carracing_learning_curve.png" alt="CarRacing PPO Learning Curves" width="90%">
+  <img src="CarRacing/carracing_learning_curve.png" alt="CarRacing PPO Learning Curves" width="90%">
 </p>
 
 - **MLP Baseline (Red):** Flatlines around $-60$ to $-80$ due to lost spatial structure.
@@ -149,12 +153,12 @@ A simulation-based mobile robotics system built with **ROS 2 Jazzy**, **Gazebo H
 
 #### Live Gazebo Sim, `/cmd_vel` Telemetry & Annotated OpenCV Tracking
 <p align="center">
-  <img src="ROS/Ball_detection/both_car_ball.png" alt="Gazebo Harmonic simulation, ROS 2 /cmd_vel stream, and OpenCV tracking window" width="95%">
+  <img src="ROS_Ball_Detection/both_car_ball.png" alt="Gazebo Harmonic simulation, ROS 2 /cmd_vel stream, and OpenCV tracking window" width="95%">
 </p>
 
 | Gazebo Harmonic World (`follower_bot` & `red_ball`) | OpenCV Annotated Detection (`rqt_image_view`) |
 | :---: | :---: |
-| <img src="ROS/Ball_detection/car_ball.png" alt="Gazebo Harmonic differential-drive robot and red ball" width="100%"> | <img src="ROS/Ball_detection/ball_detected.png" alt="OpenCV HSV ball detection overlay in rqt_image_view" width="100%"> |
+| <img src="ROS_Ball_Detection/car_ball.png" alt="Gazebo Harmonic differential-drive robot and red ball" width="100%"> | <img src="ROS_Ball_Detection/ball_detected.png" alt="OpenCV HSV ball detection overlay in rqt_image_view" width="100%"> |
 
 ### System Architecture
 
@@ -190,7 +194,7 @@ A simulation-based mobile robotics system built with **ROS 2 Jazzy**, **Gazebo H
 
 ### ROS 2 Interfaces & Simulation World
 
-- **World & Robot (`ROS/Ball_detection/worlds/robot_camera_world.sdf`):** Defines `ball_follow_world` containing `follower_bot` (box chassis, 2 driven wheels, caster wheel, $640 \times 480$ front RGB camera at 15 Hz) and `red_ball`.
+- **World & Robot (`ROS_Ball_Detection/worlds/robot_camera_world.sdf`):** Defines `ball_follow_world` containing `follower_bot` (box chassis, 2 driven wheels, caster wheel, $640 \times 480$ front RGB camera at 15 Hz) and `red_ball`.
 - **Vision Pipeline:** Dual HSV red-hue masking + morphological opening/closing + contour extraction (`cv2.minEnclosingCircle`) computing centroid $(c_x, c_y)$ and apparent radius $r$.
 - **Control Pipeline:** Proportional image-space steering toward horizontal center ($320\text{ px}$) and apparent-radius distance feedback toward target size ($85\text{ px}$), with timeout zero-velocity safety.
 
@@ -204,7 +208,7 @@ A simulation-based mobile robotics system built with **ROS 2 Jazzy**, **Gazebo H
 
 ### Preliminary Run 1 Quantitative Results
 
-Telemetry logged via `tracking_evaluator` to [run_01.csv](ROS/Ball_detection/worlds/run_01.csv) and [run_01_summary.json](ROS/Ball_detection/worlds/run_01_summary.json) across **1,566 detection samples** (~252.95 seconds):
+Telemetry logged via `tracking_evaluator` to [run_01.csv](ROS_Ball_Detection/worlds/run_01.csv) and [run_01_summary.json](ROS_Ball_Detection/worlds/run_01_summary.json) across **1,566 detection samples** (~252.95 seconds):
 
 | Metric | Run 1 Measurement | Threshold / Notes |
 | :--- | :---: | :--- |
@@ -215,39 +219,26 @@ Telemetry logged via `tracking_evaluator` to [run_01.csv](ROS/Ball_detection/wor
 | **Mean Absolute Radius Error** | **2.48 px** | Apparent-size stability |
 | **Target-Loss Events** | **0** | Continuous uninterrupted tracking |
 
-> **Diagnostic Note on Run 1:** In `run_01.csv`, `cmd_angular_rps` actively steered to track lateral target motion while `cmd_linear_mps` remained `0.0` (because the target stayed within the $85 \pm 10\text{ px}$ radius tolerance). Next work includes testing forward/reverse translational tracking under larger distance perturbations and upgrading from a P-controller to a tuned PID controller.
+### How to Run the Ball Follower Simulation
 
-### How to Run the ROS 2 Simulation
+> Full documentation and setup are in **[ROS_Ball_Detection/README.md](ROS_Ball_Detection/README.md)**.
 
-> Full detailed terminal-by-terminal instructions, manual service pose calls, and `colcon` workspace setup are documented in **[ROS/Ball_detection/README.md](ROS/Ball_detection/README.md)**.
+```bash
+# 1. Start Gazebo World
+source /opt/ros/jazzy/setup.bash
+cd ROS_Ball_Detection/worlds
+gz sim -r robot_camera_world.sdf
 
-#### Quick Overview (Ubuntu 24.04 / WSL2 with ROS 2 Jazzy + Gazebo Harmonic):
-1. **Start Gazebo World:**
-   ```bash
-   source /opt/ros/jazzy/setup.bash
-   cd /mnt/c/Users/lenovo/Desktop/AI_training/ROS/Ball_detection/worlds
-   gz sim -r robot_camera_world.sdf
-   ```
-2. **Start Bridges (`ros_gz_image` & `ros_gz_bridge`):**
-   ```bash
-   ros2 run ros_gz_image image_bridge /camera/image --ros-args -p qos:=sensor_data
-   ros2 run ros_gz_bridge parameter_bridge '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'
-   ros2 run ros_gz_bridge parameter_bridge /world/ball_follow_world/set_pose@ros_gz_interfaces/srv/SetEntityPose
-   ```
-3. **Launch Perception, Control & Target Motion Nodes:**
-   ```bash
-   source ~/ball_following_ws/install/setup.bash
-   ros2 run ball_follower ball_detector
-   ros2 run ball_follower ball_controller
-   ros2 run ball_follower target_motion
-   ```
-4. **Standalone Local Node Testing (Without Gazebo):**
-   ```bash
-   # Terminal 1: Publish synthetic moving ball camera stream
-   python3 ROS/Ball_detection/test_camera_publisher.py
-   # Terminal 2: Run standalone OpenCV ball follower
-   python3 ROS/Ball_detection/ball_follower_node.py
-   ```
+# 2. Start Bridges (in separate terminals)
+ros2 run ros_gz_image image_bridge /camera/image --ros-args -p qos:=sensor_data
+ros2 run ros_gz_bridge parameter_bridge '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'
+ros2 run ros_gz_bridge parameter_bridge /world/ball_follow_world/set_pose@ros_gz_interfaces/srv/SetEntityPose
+
+# 3. Launch Perception & Controller
+source ~/ball_following_ws/install/setup.bash
+ros2 run ball_follower ball_detector
+ros2 run ball_follower ball_controller
+```
 
 ---
 
@@ -259,12 +250,12 @@ An end-to-end autonomous navigation and mapping system built with **ROS 2 Jazzy*
 
 #### 📍 5-Waypoint Autonomous Navigation Trajectory
 <p align="center">
-  <img src="ROS/auto/nav_robot_lab_results/nav2_trajectory_plot.png" alt="Nav2 5-Waypoint Autonomous Mission Trajectory" width="90%">
+  <img src="ROS_Autonomous_Nav/nav_robot_lab_results/nav2_trajectory_plot.png" alt="Nav2 5-Waypoint Autonomous Mission Trajectory" width="90%">
 </p>
 
 | 2D SLAM Occupancy Grid Map (`arena_map.png`) | SLAM Mapping & Space Statistics |
 | :---: | :--- |
-| <img src="ROS/auto/nav_robot_lab_results/arena_map.png" alt="Occupancy Grid Map generated by SLAM Toolbox" width="85%"> | • **Resolution:** $0.05\text{ m/cell}$ ($5\text{ cm}$ precision)<br>• **Dimensions:** $187 \times 147$ grid cells<br>• **Known Mapped Area:** $35.83\text{ m}^2$<br>• **Verified Free Space:** $34.38\text{ m}^2$<br>• **Occupied Obstacle Cells:** $578\text{ cells}$<br>• **Online Scan Updates:** $195\text{ SLAM updates}$ |
+| <img src="ROS_Autonomous_Nav/nav_robot_lab_results/arena_map.png" alt="Occupancy Grid Map generated by SLAM Toolbox" width="85%"> | • **Resolution:** $0.05\text{ m/cell}$ ($5\text{ cm}$ precision)<br>• **Dimensions:** $187 \times 147$ grid cells<br>• **Known Mapped Area:** $35.83\text{ m}^2$<br>• **Verified Free Space:** $34.38\text{ m}^2$<br>• **Occupied Obstacle Cells:** $578\text{ cells}$<br>• **Online Scan Updates:** $195\text{ SLAM updates}$ |
 
 ### 5-Waypoint Navigation Benchmark
 
@@ -287,6 +278,8 @@ During the recorded validation trial (`arena-five-goals.w4toMH`), the robot auto
 
 ### How to Run Autonomous Navigation
 
+> Full benchmark guide and parameters are in **[ROS_Autonomous_Nav/README.md](ROS_Autonomous_Nav/README.md)**.
+
 ```bash
 # Source ROS 2 Jazzy and the workspace
 source /opt/ros/jazzy/setup.bash
@@ -302,55 +295,96 @@ ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
 
 ---
 
+# 🦾 Part IV: Two-Joint Robot Arm Kinematics & Interactive Control
+
+A 2-degree-of-freedom (2-DOF) planar manipulator simulation with an interactive GUI featuring real-time forward kinematics calculation, joint slider controls, and distance-to-target evaluation.
+
+### Forward Kinematics & Target Acquisition
+
+The position of the end-effector tip $(x_e, y_e)$ is governed by:
+$$x_e = L_1 \cos(\theta_1) + L_2 \cos(\theta_1 + \theta_2)$$
+$$y_e = L_1 \sin(\theta_1) + L_2 \sin(\theta_1 + \theta_2)$$
+
+### Demonstrations
+
+| Target Acquisition Configuration | Orthogonal Configuration |
+| :---: | :---: |
+| <img src="Two_Joint_Robot_Arm/two_arm.png" alt="Two-Joint Arm Target Alignment" width="100%"> | <img src="Two_Joint_Robot_Arm/two_arm_2.png" alt="Two-Joint Arm 90-degree configuration" width="100%"> |
+
+#### 🎬 Joint Motion Video Demo:
+https://github.com/user-attachments/assets/two_joint_robot.mp4
+
+<p align="center">
+  <video src="Two_Joint_Robot_Arm/two_joint_robot.mp4" width="85%" controls autoplay loop muted></video>
+</p>
+
+> Details documented in **[Two_Joint_Robot_Arm/README.md](Two_Joint_Robot_Arm/README.md)**.
+
+---
+
 ## 📂 Repository Structure
+
+The repository is modular and cleanly separated into 6 dedicated project directories:
 
 ```text
 AI_training/
-├── CartPole.py                    # CartPole PPO training & evaluation
-├── LunarLander.py                 # LunarLander PPO training, checkpointing & evaluation
-├── CarRacing.py                   # CarRacing CNN training, Anti-Suicide wrapper & manual mode
-├── ppo_cartpole.zip               # Trained PPO weights for CartPole
-├── ppo_lunar_lander.zip           # Trained PPO weights for LunarLander
-├── ppo_carracing.zip              # Trained PPO CNN weights for CarRacing
-├── CartPole.mp4                   # Demo video: CartPole balancing
-├── LanderLanding_perfect.mp4      # Demo video: LunarLander touchdown between flags
-├── carracing_trained_demo.gif     # Demo GIF: Trained CNN navigating track
-├── carracing_learning_curve.png   # Plot: MLP vs CNN learning curves
-├── ROS/                           # ROS 2 Jazzy Robotics Projects
-│   ├── Ball_detection/            # Vision-Based Target Following (OpenCV + Gazebo)
-│   │   ├── ball_follower_node.py  # Standalone OpenCV perception + P-controller node
-│   │   ├── test_camera_publisher.py # Synthetic camera publisher for quick testing
-│   │   ├── controller.py          # Basic ROS 2 Twist velocity publisher demo
-│   │   ├── car_ball.png           # Screenshot: Gazebo Harmonic robot & red ball world
-│   │   ├── ball_detected.png      # Screenshot: rqt_image_view OpenCV target tracking
-│   │   ├── both_car_ball.png      # Screenshot: Live Gazebo + /cmd_vel + OpenCV view
-│   │   ├── launch/                # ROS 2 launch configurations
-│   │   ├── urdf/                  # Differential-drive robot model URDF
-│   │   ├── worlds/
-│   │   │   ├── robot_camera_world.sdf # Gazebo Harmonic world (follower_bot + red_ball)
-│   │   │   ├── ball_world.sdf     # Classic Gazebo world template
-│   │   │   ├── run_01.csv         # Run 1 frame-by-frame tracking telemetry
-│   │   │   └── run_01_summary.json # Run 1 aggregate evaluation metrics
-│   │   └── README.md              # Dedicated Ball-Follower build & experiment guide
-│   └── auto/                      # Autonomous Navigation & SLAM (Nav2 + SLAM Toolbox)
-│       ├── autonomous_nav_ws/     # ROS 2 Nav2 workspace (src/nav_robot_lab)
-│       ├── nav_robot_lab_results/ # SLAM & Nav2 benchmark outputs
-│       │   ├── arena_map.png      # Mapped occupancy grid image
-│       │   ├── arena_map.yaml     # Map metadata (resolution: 0.05m, origin)
-│       │   ├── arena_map.pgm      # Raw PGM occupancy grid
-│       │   ├── nav2_trajectory_plot.png # 2D trajectory & waypoint arrival plot
-│       │   ├── trajectory.csv     # 4,500 telemetry poses logged during navigation
-│       │   ├── goals.jsonl        # Individual waypoint timing & outcome logs
-│       │   └── nav2_run_summary.json # High-level benchmark performance summary
-│       └── README.md              # Dedicated Nav2 & SLAM benchmark guide
-└── README.md                      # Unified repository documentation
+├── CartPole/                          # 🕹️ CartPole-v1 RL Project
+│   ├── CartPole.py                    # PPO training, checkpointing & evaluation
+│   ├── CartPole.mp4                   # Video: Balancing demo
+│   ├── ppo_cartpole.zip               # Trained PPO neural weights
+│   └── README.md                      # Dedicated project guide
+│
+├── LunarLander/                       # 🚀 LunarLander-v3 RL Project
+│   ├── LunarLander.py                 # PPO training with gamma=0.999 tuning
+│   ├── LanderLanding_perfect.mp4      # Video: Soft touchdown demo
+│   ├── ppo_lunar_lander.zip           # Trained PPO neural weights
+│   └── README.md                      # Dedicated project guide
+│
+├── CarRacing/                         # 🏎️ CarRacing-v3 Vision RL Project
+│   ├── CarRacing.py                   # Nature-CNN PPO with Anti-Suicide wrapper
+│   ├── carracing_trained_demo.gif     # Demo GIF: Autonomous driving
+│   ├── carracing_learning_curve.png   # Performance curve: MLP vs CNN vs Wrapper
+│   ├── ppo_carracing.zip              # Trained CNN neural weights
+│   └── README.md                      # Dedicated project guide
+│
+├── ROS_Ball_Detection/                # 🔴 Vision Target Following Robot
+│   ├── ball_follower_node.py          # Standalone OpenCV perception + P-controller node
+│   ├── test_camera_publisher.py       # Synthetic camera publisher for rapid testing
+│   ├── controller.py                  # Basic Twist publisher demo
+│   ├── car_ball.png                   # Gazebo simulation screenshot
+│   ├── ball_detected.png              # OpenCV rqt_image_view target overlay
+│   ├── both_car_ball.png              # Full simulation & telemetry view
+│   ├── launch/                        # ROS 2 launch files
+│   ├── urdf/                          # follower_bot differential-drive robot URDF
+│   ├── worlds/                        # Gazebo Harmonic worlds & telemetry logs
+│   └── README.md                      # Dedicated build & simulation guide
+│
+├── ROS_Autonomous_Nav/                # 🧭 Nav2 + SLAM Autonomous Navigation
+│   ├── autonomous_nav_ws/             # ROS 2 Navigation workspace
+│   ├── nav_robot_lab_results/         # SLAM maps, telemetry logs & trajectory plots
+│   │   ├── arena_map.png              # Mapped occupancy grid
+│   │   ├── arena_map.yaml             # Map metadata
+│   │   ├── arena_map.pgm              # Raw PGM map
+│   │   ├── nav2_trajectory_plot.png   # 2D waypoint path plot
+│   │   ├── trajectory.csv             # 4,500 recorded telemetry coordinates
+│   │   └── goals.jsonl                # Waypoint arrival timings
+│   └── README.md                      # Dedicated Nav2 & SLAM benchmark guide
+│
+├── Two_Joint_Robot_Arm/               # 🦾 2-DOF Planar Robot Arm
+│   ├── two_joint_robot.mp4            # Video: Interactive kinematics demonstration
+│   ├── two_arm.png                    # Target alignment screenshot
+│   ├── two_arm_2.png                  # Orthogonal pose screenshot
+│   └── README.md                      # Kinematics formulas & guide
+│
+├── .gitignore                         # Comprehensive ignore rules
+└── README.md                          # Master portfolio documentation
 ```
 
 ---
 
 ## 🛠️ Installation & Setup
 
-### Part 1: Reinforcement Learning (Windows / Linux)
+### Reinforcement Learning (Windows / Linux)
 ```bash
 git clone https://github.com/Rehansajid2130/Agent_training.git
 cd Agent_training
@@ -360,24 +394,21 @@ python -m venv .venv
 .venv\Scripts\activate      # Windows
 # source .venv/bin/activate # Linux/macOS
 
-# Install Gymnasium, Box2D, Stable-Baselines3, Pygame
+# Install dependencies
 pip install gymnasium[classic-control] gymnasium[box2d] stable-baselines3 pygame numpy pillow
 ```
 
 **Run any RL environment:**
 ```bash
-python CartPole.py      # Toggle TRAIN_MORE = True/False
-python LunarLander.py   # Toggle TRAIN_MORE = True/False
-python CarRacing.py     # Set MODE = "WATCH", "MANUAL", or "TRAIN"
+python CartPole/CartPole.py
+python LunarLander/LunarLander.py
+python CarRacing/CarRacing.py
 ```
 
-### Part 2: ROS 2 & Gazebo Ball-Follower (Ubuntu 24.04 / WSL2)
-- Requires **ROS 2 Jazzy**, **Gazebo Harmonic**, `python3-opencv`, `ros-jazzy-cv-bridge`, `ros-jazzy-ros-gz-sim`, `ros-jazzy-ros-gz-bridge`, and `ros-jazzy-ros-gz-image`.
-- See **[ROS/Ball_detection/README.md](ROS/Ball_detection/README.md)** for full `colcon build` and multi-terminal simulation instructions.
-
-### Part 3: Autonomous Navigation & SLAM (Ubuntu 24.04 / WSL2)
-- Requires **ROS 2 Jazzy**, **Nav2** (`ros-jazzy-navigation2`, `ros-jazzy-nav2-bringup`), and **SLAM Toolbox** (`ros-jazzy-slam-toolbox`).
-- See **[ROS/auto/README.md](ROS/auto/README.md)** for launch sequences, multi-goal sending, and map generation.
+### ROS 2 Robotics & Navigation (Ubuntu 24.04 / WSL2)
+- Requires **ROS 2 Jazzy**, **Gazebo Harmonic**, **Nav2**, **SLAM Toolbox**, and `cv_bridge`.
+- See **[ROS_Ball_Detection/README.md](ROS_Ball_Detection/README.md)** for ball-following instructions.
+- See **[ROS_Autonomous_Nav/README.md](ROS_Autonomous_Nav/README.md)** for SLAM & Nav2 launch steps.
 
 ---
 
@@ -388,8 +419,9 @@ python CarRacing.py     # Set MODE = "WATCH", "MANUAL", or "TRAIN"
 | **CartPole-v1** | Gymnasium | 4D State Vector | PPO (`MlpPolicy`) | **500.0** (Max Score Achieved) |
 | **LunarLander-v3** | Gymnasium + Box2D | 8D State Vector | PPO (`MlpPolicy`, $\gamma=0.999$) | **+200 to +280+** (Pinpoint Landing) |
 | **CarRacing-v3** | Gymnasium + Box2D | $96 \times 96 \times 3$ RGB Pixels | PPO (`CnnPolicy` + Wrapper) | **+150 to +250+** (Anti-Suicide Nav) |
-| **Ball-Following Robot** | ROS 2 Jazzy + Gazebo Harmonic | $640 \times 480$ RGB @ 15 Hz | OpenCV HSV + P-Controller | **100% Detection** / **47.83% Centering** (Run 1) |
+| **Ball-Following Robot** | ROS 2 Jazzy + Gazebo Harmonic | $640 \times 480$ RGB @ 15 Hz | OpenCV HSV + P-Controller | **100% Detection** / **47.83% Centering** |
 | **Autonomous Nav & SLAM** | ROS 2 Jazzy + Nav2 + SLAM Toolbox | 2D LiDAR (`/scan`) + Odometry | Costmaps + DWB Controller + BT | **5 / 5 Goals Reached (100%)**, $35.83\text{ m}^2$ mapped |
+| **Two-Joint Robot Arm** | Python GUI Kinematics | Joint Angles $(\theta_1, \theta_2)$ | Forward Kinematics | **0.00 Distance Error** to Target |
 
 ---
 
@@ -400,6 +432,3 @@ python CarRacing.py     # Set MODE = "WATCH", "MANUAL", or "TRAIN"
 - [ROS 2 Jazzy & Gazebo Harmonic Documentation](https://docs.ros.org/en/jazzy/)
 - [Nav2 Documentation (ROS Navigation Stack)](https://navigation.ros.org/)
 - [SLAM Toolbox Documentation (Steve Macenski)](https://github.com/SteveMacenski/slam_toolbox)
-- [Stable-Baselines3 (DLR-RM)](https://stable-baselines3.readthedocs.io/)
-- [Proximal Policy Optimization Algorithms (Schulman et al., 2017)](https://arxiv.org/abs/1707.06347)
-- [ROS 2 Jazzy & Gazebo Harmonic Documentation](https://docs.ros.org/en/jazzy/)

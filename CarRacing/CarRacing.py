@@ -6,7 +6,8 @@ import pygame
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 
-MODEL_PATH = "ppo_carracing.zip"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(SCRIPT_DIR, "ppo_carracing.zip")
 
 # =============================================================
 # CHOOSE YOUR MODE:

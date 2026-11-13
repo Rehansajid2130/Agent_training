@@ -2,7 +2,8 @@ import os
 import gymnasium as gym
 from stable_baselines3 import PPO
 
-MODEL_PATH = "ppo_cartpole.zip"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(SCRIPT_DIR, "ppo_cartpole.zip")
 TRAIN_MORE = True
 
 if os.path.exists(MODEL_PATH):

@@ -1,0 +1,3 @@
+Controller PWM output ──► Motor driver ──► DC motor
+12 V motor supply ──────► Motor driver
+Controller encoder input ◄── Encoder on motor shaft

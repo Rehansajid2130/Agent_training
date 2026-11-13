@@ -3,7 +3,8 @@ import gymnasium as gym
 import os
 from stable_baselines3 import PPO
 
-MODEL_PATH ="ppo_lunar_lander.zip"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(SCRIPT_DIR, "ppo_lunar_lander.zip")
 TRAIN_MORE = False
 
 if os.path.exists(MODEL_PATH):
@@ -14,7 +15,7 @@ if os.path.exists(MODEL_PATH):
 
         print("Training LunarLander..")
         model.learn(total_timesteps=360000)
-        model.save("ppo_lunar_lander.zip")
+        model.save(MODEL_PATH)
 
         train_env.close()
         print("updated")
