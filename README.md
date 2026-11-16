@@ -42,6 +42,7 @@ This repository is organized into dedicated, self-contained project folders acro
 4. **[ROS_Ball_Detection](ROS_Ball_Detection/)**: Differential-drive robot (`follower_bot`) in **Gazebo Harmonic** streaming front RGB images to **ROS 2 Jazzy**, detecting a dynamic red ball via OpenCV HSV thresholding, and closing the visual control loop.
 5. **[ROS_Autonomous_Nav](ROS_Autonomous_Nav/)**: Complete mobile robot navigation stack with **Nav2 (Navigation2)**, **SLAM Toolbox**, 2D LiDAR costmaps, and collision avoidance navigating a 5-waypoint arena with **100% mission success**.
 6. **[Two_Joint_Robot_Arm](Two_Joint_Robot_Arm/)**: Interactive 2-DOF planar robotic manipulator featuring forward kinematics, joint angle slider controls, and real-time end-effector tip tracking.
+7. **[Differential-Drive Robot Simulator](Differential_Drive_Robot/)**: Python and Tkinter simulator with manual wheel-speed control, click-to-target steering, and a four-waypoint square route.
 
 ---
 
