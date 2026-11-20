@@ -1,0 +1,14 @@
+test,expected,command_latency_s,final_linear_mps,final_angular_rps,result
+visible_1,motion,0.431955,0.12,0.25,PASS
+blank_frame_stop_1,stop,0.026314,0.0,0.0,PASS
+reacquire_1,motion,0.036544,0.12,0.25,PASS
+visible_2,motion,0.025701,0.12,0.25,PASS
+blank_frame_stop_2,stop,0.031817,0.0,0.0,PASS
+reacquire_2,motion,0.099622,0.12,0.25,PASS
+visible_3,motion,0.099877,0.12,0.25,PASS
+blank_frame_stop_3,stop,0.037053,0.0,0.0,PASS
+reacquire_3,motion,0.094515,0.12,0.25,PASS
+camera_feed_timeout,stop,0.619632,0.0,0.0,PASS
+feed_return,motion,0.088328,0.12,0.25,PASS
+malformed_detection,stop,0.024563,0.0,0.0,PASS
+zero_radius,stop,0.427138,0.0,0.0,PASS
