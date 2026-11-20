@@ -3,6 +3,7 @@
 # Change these switches, then run this Python file.
 TRAIN_AGENT = False       # True: train fresh agents, save them, evaluate, then show demo.
 EVALUATE_AGENT = False    # True: evaluate saved agents again without retraining.
+RUN_NOISE_TEST = False    # True: compare saved trained agents with clean/noisy observations.
 TRAINING_STEPS = 300000  # Per training seed; rounded up to a complete rollout.
 DEMO_SEED = 7             # Choose 7, 17 or 27.
 EVALUATION_EPISODES = 100
@@ -113,6 +114,109 @@ HERE = Path(__file__).resolve().parent
 RESULTS = HERE / 'results'
 TRAIN_SEEDS = (7, 17, 27)
 TEST_SEED_START = 100000
+NOISE_LEVELS = (('clean', 0.0, 0.0), ('small', 0.02, 2.0), ('moderate', 0.05, 5.0))
+
+
+def noisy_observation(observation, rng, distance_std, angle_std_degrees):
+    """Add Gaussian noise to physical distances/bearings, then rebuild the six inputs."""
+    if distance_std == 0 and angle_std_degrees == 0:
+        return observation.copy()
+    measured = observation.copy()
+    distance_errors = rng.normal(0, distance_std, size=2)
+    angle_errors = rng.normal(0, math.radians(angle_std_degrees), size=2)
+    for index, offset in enumerate((0, 3)):
+        measured[offset] = max(0.0, float(observation[offset])*6 + distance_errors[index]) / 6
+        bearing = math.atan2(float(observation[offset+1]), float(observation[offset+2])) + angle_errors[index]
+        measured[offset+1] = math.sin(bearing)
+        measured[offset+2] = math.cos(bearing)
+    return measured
+
+
+def evaluate_noise(episodes, output_dir=None):
+    """Freeze each policy and change only its inputs, never the simulator's true state."""
+    import hashlib
+    import torch
+    torch.set_num_threads(1)
+    output = RESULTS if output_dir is None else Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+    fingerprints = {seed: hashlib.sha256((RESULTS / f'ppo_seed_{seed}.zip').read_bytes()).hexdigest()
+                    for seed in TRAIN_SEEDS}
+    rows, summaries = [], []
+    for seed in TRAIN_SEEDS:
+        model = load_model(seed)
+        for name, distance_std, angle_std in NOISE_LEVELS:
+            condition_rows = []
+            env = GoalEnv()
+            for episode in range(episodes):
+                scenario = TEST_SEED_START + episode
+                obs, _ = env.reset(seed=scenario)
+                # Independent of environment sampling. Shared noise draws across policy seeds/levels.
+                rng = np.random.default_rng(500000 + scenario)
+                episode_return = 0.0
+                for step in range(env.MAX_STEPS):
+                    measured = noisy_observation(obs, rng, distance_std, angle_std)
+                    action, _ = model.predict(measured, deterministic=True)
+                    obs, reward, terminated, truncated, info = env.step(action)
+                    episode_return += reward
+                    if terminated or truncated:
+                        break
+                condition_rows.append(dict(model_seed=seed, scenario_seed=scenario,
+                                           noise=name, distance_std_units=distance_std,
+                                           bearing_std_degrees=angle_std,
+                                           success=int(info['is_success']), collision=int(info['collision']),
+                                           timeout=int(truncated), steps=step+1,
+                                           initial_distance=info['initial_distance'],
+                                           final_distance=info['distance'], path_length=info['path_length'],
+                                           min_clearance=info['min_clearance'], episode_return=episode_return))
+            rows.extend(condition_rows)
+            summary = dict(model_seed=seed, noise=name,
+                           success=100*statistics.mean(r['success'] for r in condition_rows),
+                           collision=100*statistics.mean(r['collision'] for r in condition_rows),
+                           timeout=100*statistics.mean(r['timeout'] for r in condition_rows))
+            summaries.append(summary)
+            print(f'Seed {seed}, {name}: {summary["success"]:.1f}% success; '
+                  f'{summary["collision"]:.1f}% collisions; {summary["timeout"]:.1f}% timeouts', flush=True)
+            env.close()
+    assert all(hashlib.sha256((RESULTS / f'ppo_seed_{seed}.zip').read_bytes()).hexdigest() == digest
+               for seed, digest in fingerprints.items()), 'A model changed during evaluation'
+    write_csv(output / 'noise_evaluation.csv', rows)
+    report = ['# Observation Noise Experiment', '',
+              f'Frozen trained policies for seeds {TRAIN_SEEDS}; {episodes} paired scenarios per policy and condition, '
+              f'starting at scenario seed {TEST_SEED_START}. No retraining or checkpoint selection.', '',
+              '## Noise settings', '',
+              '| Condition | Distance standard deviation | Bearing standard deviation |',
+              '|---|---:|---:|']
+    for name, distance_std, angle_std in NOISE_LEVELS:
+        report.append(f'| {name} | {distance_std:.2f} simulation units | {angle_std:.0f} degrees |')
+    report += ['', 'Noise is independent Gaussian error on goal and obstacle distances and bearings at every observation. '
+               'Distances are clamped to zero before rescaling; sine/cosine inputs are reconstructed from noisy bearings. '
+               'Geometry, collision detection, reward and success use true simulator state. '
+               'Noise RNG seed is 500000 + scenario_seed, separate from environment RNG. '
+               'Noise levels share the same standard-normal draws, scaled to their respective standard deviations.', '',
+               '## Results by training seed', '',
+               '| Model seed | Condition | Success | Collisions | Timeouts |', '|---|---|---:|---:|---:|']
+    for s in summaries:
+        report.append(f'| {s["model_seed"]} | {s["noise"]} | {s["success"]:.1f}% | '
+                      f'{s["collision"]:.1f}% | {s["timeout"]:.1f}% |')
+    report += ['', '## Combined comparison', '',
+               '| Condition | Success | Collisions | Timeouts | Change in success vs clean |',
+               '|---|---:|---:|---:|---:|']
+    clean_rate = statistics.mean(s['success'] for s in summaries if s['noise']=='clean')
+    for name, _, _ in NOISE_LEVELS:
+        selected = [s for s in summaries if s['noise']==name]
+        rate = statistics.mean(s['success'] for s in selected)
+        report.append(f'| {name} | {rate:.2f}% | {statistics.mean(s["collision"] for s in selected):.2f}% | '
+                      f'{statistics.mean(s["timeout"] for s in selected):.2f}% | {rate-clean_rate:+.2f} percentage points |')
+    report += ['', 'Rates average the three policies on shared scenarios; these are not independent maps. '
+               'This is one reproducible noise sequence per scenario, not multiple independent noise repeats. '
+               'The clean case is rerun using the current saved weights rather than copied from an earlier report. '
+               'The experiment measures sensitivity to this artificial noise model, not calibrated real sensors. '
+               'A change is descriptive; no statistical significance or safety guarantee is claimed.', '',
+               '## Saved-model fingerprints', '', 'SHA-256 fingerprints were verified unchanged after the experiment:']
+    report += [f'- Seed {seed}: `{digest}`' for seed, digest in fingerprints.items()]
+    report += ['', 'Raw episode data: [noise_evaluation.csv](noise_evaluation.csv).']
+    (output / 'noise_report.md').write_text('\n'.join(report)+'\n', encoding='utf-8')
+    return summaries
 
 
 def write_csv(path, rows):
@@ -293,6 +397,7 @@ def demo(seed):
     model = load_model(seed)
     untrained = load_model(seed, True)
     root = tk.Tk()
+    noise_mode = tk.BooleanVar(value=False)
     root.title('Obstacle Avoidance | Before Training vs Goal-Only Control vs Trained PPO')
     root.resizable(False, False)
     header = ttk.Label(root, font=('Segoe UI', 13), padding=12)
@@ -300,11 +405,14 @@ def demo(seed):
     container = ttk.Frame(root)
     container.pack()
     canvases = []
+    panel_labels = []
     names = [f'Untrained PPO | seed {seed}', 'Goal-only controller', f'Trained PPO | seed {seed}']
     for index, name in enumerate(names):
         frame = ttk.Frame(container, padding=6)
         frame.grid(row=0, column=index)
-        ttk.Label(frame, text=name, font=('Segoe UI', 13, 'bold')).pack()
+        label = ttk.Label(frame, text=name, font=('Segoe UI', 13, 'bold'))
+        label.pack()
+        panel_labels.append(label)
         canvas = tk.Canvas(frame, width=340, height=350, bg='#f5f7fb', highlightthickness=0)
         canvas.pack()
         canvases.append(canvas)
@@ -318,8 +426,13 @@ def demo(seed):
         state['success'] = [False]*3
         state['collision'] = [False]*3
         state['paths'] = [[env.position.copy()] for env in envs]
-        state['rng'] = np.random.default_rng(200000 + state['scenario'] - TEST_SEED_START)
-        header.config(text=f'Same scenario: {state["scenario"]} | One fixed obstacle | 1 step = 0.1 simulated seconds')
+        state['noise_rngs'] = [np.random.default_rng(500000 + state['scenario']) for _ in range(3)]
+        labels = ['Clean inputs', 'Small noise: 0.02 units / 2 deg',
+                  'Moderate noise: 0.05 units / 5 deg'] if noise_mode.get() else names
+        for label, text in zip(panel_labels, labels):
+            label.config(text=text)
+        mode = 'Observation noise comparison' if noise_mode.get() else 'Before / after training'
+        header.config(text=f'Scenario: {state["scenario"]} | {mode} | PPO seed {seed} | 1 step = 0.1 simulated seconds')
 
     def draw(index):
         canvas, env, path = canvases[index], envs[index], state['paths'][index]
@@ -361,7 +474,11 @@ def demo(seed):
             for index, env in enumerate(envs):
                 if not state['done'][index]:
                     obs = state['obs'][index]
-                    if index == 0:
+                    if noise_mode.get():
+                        _, distance_std, angle_std = NOISE_LEVELS[index]
+                        measured = noisy_observation(obs, state['noise_rngs'][index], distance_std, angle_std)
+                        action, _ = model.predict(measured, deterministic=True)
+                    elif index == 0:
                         action, _ = untrained.predict(obs, deterministic=True)
                     elif index == 1:
                         action = rule_action(obs)
@@ -379,6 +496,7 @@ def demo(seed):
 
     controls = ttk.Frame(root, padding=12)
     controls.pack()
+    ttk.Checkbutton(controls, text='Compare observation noise', variable=noise_mode, command=reset).pack(side='left', padx=8)
     ttk.Button(controls, text='Next scenario', command=lambda: reset(1)).pack(side='left', padx=8)
     ttk.Button(controls, text='Replay', command=reset).pack(side='left', padx=8)
     ttk.Button(controls, text='Pause / Resume', command=lambda: state.update(paused=not state['paused'])).pack(side='left', padx=8)
@@ -444,6 +562,24 @@ def check_environment():
             raise AssertionError('Invalid action accepted')
     print('Passed: API contract, seeding, safe reset, forward/turn motion, swept collision, collision penalty, success bonus, timeout and invalid inputs.')
 
+    env.reset(seed=42)
+    obs = env.observation()
+    position, heading = env.position.copy(), env.heading
+    clean = noisy_observation(obs, np.random.default_rng(1), 0, 0)
+    assert np.array_equal(clean, obs)
+    first = noisy_observation(obs, np.random.default_rng(1), .05, 5)
+    second = noisy_observation(obs, np.random.default_rng(1), .05, 5)
+    assert np.array_equal(first, second) and not np.array_equal(first, obs)
+    assert env.observation_space.contains(first)
+    assert np.allclose([np.linalg.norm(first[1:3]), np.linalg.norm(first[4:6])], 1)
+    assert np.array_equal(env.position, position) and env.heading == heading
+    twin = GoalEnv()
+    twin.reset(seed=42)
+    a = env.step([.2, -.3])
+    b = twin.step([.2, -.3])
+    assert np.array_equal(a[0], b[0]) and a[1:] == b[1:]
+    print('Passed: zero-noise identity, repeatable perturbations, valid angle encoding and unchanged true-state dynamics.')
+
 
 def main():
     check_environment()
@@ -451,6 +587,8 @@ def main():
         train(TRAINING_STEPS)
     if TRAIN_AGENT or EVALUATE_AGENT:
         evaluate(EVALUATION_EPISODES)
+    if RUN_NOISE_TEST:
+        evaluate_noise(EVALUATION_EPISODES)
     demo(DEMO_SEED)
 
 

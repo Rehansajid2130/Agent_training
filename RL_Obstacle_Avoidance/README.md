@@ -70,7 +70,7 @@ The six observations are:
  sin(obstacle_bearing_error), cos(obstacle_bearing_error)]
 ```
 
-Bearings are relative to the robot's heading. Sine and cosine avoid an angular wraparound discontinuity. Distances are scaled but not clipped. Exact simulator state is used: these are not camera or LiDAR measurements. Because obstacle and robot radii are fixed, the obstacle-centre distance also determines clearance.
+Bearings are relative to the robot's heading. Sine and cosine avoid an angular wraparound discontinuity. Distances are scaled but not clipped. Training and the original comparison use exact simulator state. The observation-noise experiment below perturbs policy inputs only; these are not camera or LiDAR measurements. Because obstacle and robot radii are fixed, the obstacle-centre distance also determines clearance.
 
 The policy outputs two numbers in `[-1, 1]`:
 
@@ -175,6 +175,36 @@ Mean trained success was **94.67%**, with sample standard deviation **3.79 perce
 
 The demo remains on seed 7 by default despite seed 17's higher test score. This avoids selecting the default model based on the final evaluation. These values are a historical snapshot; after rerunning, consult the generated report and update this section before presenting new results.
 
+## 6.1 Observation-Noise Experiment
+
+**Practical question:** Does a trained controller still reach its goal when the distances and directions it receives are slightly inaccurate?
+
+This experiment keeps the saved policy weights fixed. It adds Gaussian measurement errors to goal and obstacle distances and relative bearings before passing observations to the policy. Sine/cosine inputs are rebuilt from the noisy angle. Negative noisy distances are clamped to zero. The simulator's actual positions, motion, rewards, collisions and success checks remain unchanged.
+
+| Condition | Distance error standard deviation | Bearing error standard deviation |
+|---|---:|---:|
+| Clean | 0 units | 0 degrees |
+| Small noise | 0.02 units | 2 degrees |
+| Moderate noise | 0.05 units | 5 degrees |
+
+Errors are resampled at every observation, independently for the goal and obstacle. These settings describe simulated errors in arbitrary length units, not measured sensor accuracy. Gaussian standard deviations are not maximum error bounds.
+
+All three saved trained policies are tested on the same 100 scenario seeds, giving 900 policy-condition episodes. The noise generator is separate from the environment generator and uses seed `500000 + scenario_seed`. Small and moderate conditions use the same standard-normal draws at each step, scaled to their specified noise levels. This makes reruns reproducible and holds the scenario sampling fixed. It does not provide independent repeated noise trials.
+
+Read [the noise experiment report](results/noise_report.md) and [raw episode measurements](results/noise_evaluation.csv). The clean case is rerun using the current saved models. Model fingerprints are checked before and after evaluation to verify that no learning occurs during this experiment.
+
+To see the effect visually, run the usual single Python file and tick **Compare observation noise**. The three panels then show the same trained policy with clean, small-noise and moderate-noise inputs. Replay resets both the scenario and noise sequence. Untick the box to return to the original before/after comparison. The visual display shows the true simulated positions; noise affects what the policy receives, not where the objects are drawn.
+
+### Recorded observation
+
+Across the three saved policies, clean-input success averaged **94.67%**. Both noisy conditions averaged **94.33%**, a decrease of **0.33 percentage points**. Seeds 7 and 17 retained their success rates of 93% and 99%; seed 27 declined from 92% to 91%. No timeouts occurred in these conditions; unsuccessful episodes ended in collisions.
+
+The measured effect on success was small under these settings. This is a valid experimental result, rather than a reason to claim that noise has no effect or increase it until a dramatic failure appears. Paths and actions can still differ when final outcome counts are similar. More noise repeats and a broader range of scenarios would be needed to assess sensitivity with greater confidence. These values are a historical snapshot; use the generated report for the current saved models after rerunning.
+
+### What this demonstrates
+
+The contribution is the practical work of choosing a limitation, changing one part of the input pipeline, checking that true-state evaluation stays valid, running a controlled comparison and explaining the result. A suitable description is: "Extended a simulated PPO robot controller with reproducible observation-noise tests and compared goal success, collisions and timeouts on shared scenarios."
+
 ## 7. Reproduction
 
 All project code is in **`RL_Obstacle_Avoidance.py`**: the environment, controller, training, evaluation, learning-curve export, checks and demo.
@@ -184,6 +214,7 @@ At the top of that file:
 ```python
 TRAIN_AGENT = False
 EVALUATE_AGENT = False
+RUN_NOISE_TEST = False
 TRAINING_STEPS = 300000
 DEMO_SEED = 7
 EVALUATION_EPISODES = 100
@@ -192,6 +223,7 @@ EVALUATION_EPISODES = 100
 - **`TRAIN_AGENT = False`:** load the included saved models and show the demo.
 - **`TRAIN_AGENT = True`:** train fresh agents for seeds 7, 17 and 27, replace their generated checkpoints and logs, evaluate them, then show the demo. This starts fresh rather than continuing an existing policy.
 - **`EVALUATE_AGENT = True`:** regenerate the evaluation from saved models without retraining when `TRAIN_AGENT` is false.
+- **`RUN_NOISE_TEST = True`:** compare the current saved trained policies under clean, small-noise and moderate-noise observations, save the experiment data, then show the demo. Keep `TRAIN_AGENT = False` to run this without retraining.
 - **`DEMO_SEED`:** choose 7, 17 or 27 for the displayed before/after or controller comparison.
 
 Run from a terminal in this folder:
@@ -207,7 +239,7 @@ The earlier multi-file implementation and launchers are retained in `archive_pre
 ## 8. Limitations
 
 - One known, fixed circular obstacle is substantially simpler than a cluttered or changing environment.
-- The policy receives exact relative geometry without sensing or actuation noise.
+- Training uses exact geometry. Evaluation now includes artificial observation noise, but no calibrated real-sensor model or actuation noise.
 - The robot model has no dynamics or physical collision response.
 - Three training seeds and 100 shared test scenarios provide limited evidence, not a safety guarantee.
 - The programmed reference ignores the obstacle; no comparison with A*, model predictive control, or an obstacle-aware hand-designed controller is made.
@@ -215,7 +247,7 @@ The earlier multi-file implementation and launchers are retained in `archive_pre
 - Successful-path averages can hide failures. Always report all outcome rates.
 - ROS/Gazebo integration and physical robot testing have not been performed.
 
-A sensible extension is to evaluate observation noise with the existing fixed obstacle. Varying obstacle position, size, or count would require a separately defined training/evaluation task.
+A sensible next improvement is to repeat the noise experiment with several independent noise seeds per scenario. Varying obstacle position, size, or count would require a separately defined training/evaluation task.
 
 ## 9. Interview Notes
 
@@ -233,7 +265,7 @@ A sensible extension is to evaluate observation noise with the existing fixed ob
 |---|---|
 | `RL_Obstacle_Avoidance.py` | Complete runnable project with training switch at the top |
 | `README.md` | Research method, results, limitations and usage |
-| `results/` | Saved policy weights, training logs, metadata, learning curve and evaluation evidence |
+| `results/` | Saved policy weights, training logs, metadata, learning curve, evaluation evidence and observation-noise results |
 | `archive_previous_layout/` | Previous scripts and launchers, retained as a backup |
 
 References: [Gymnasium custom environments](https://gymnasium.farama.org/introduction/create_custom_env/), [Stable-Baselines3 PPO](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html), and [evaluation guidance](https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html).
