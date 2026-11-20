@@ -28,7 +28,7 @@ Run `python RL_Obstacle_Avoidance.py`, or open that file in your Python editor a
 | Goal-only controller | Programmed steering toward the goal, deliberately ignoring the obstacle |
 | Trained PPO | Deterministic actions from the final trained network |
 
-All three panels use the same start, initial heading, goal, and obstacle. The default training seed is 7, chosen in advance rather than selected for its evaluation score.
+All three panels use the same start, initial heading, goal, and obstacle. The default displayed model seed is 7, chosen in advance rather than selected for its evaluation score.
 
 Use **Next scenario**, **Replay**, and **Pause / Resume** to inspect trajectories. The red disk is the obstacle; its dashed outline includes the robot radius. Green marks the goal region. Views auto-scale independently, so compare numerical path lengths rather than apparent screen distances. The animation advances one 0.1-second simulation step per frame; display speed is not a real-time control measurement.
 
@@ -132,7 +132,7 @@ Other PPO parameters use the installed library defaults. The actual budget is ro
 
 Each initial network is saved **before learning** as `untrained_seed_*.zip`. The final network is saved as `ppo_seed_*.zip`. Thus the untrained reference is the same seed's initialisation, not an unrelated trained model. Deterministic untrained actions are not the same as uniformly random actions.
 
-Episode rewards, lengths, success and collision flags are saved in training CSV files. The [learning curve](results/training_curve.svg) shows rolling training success across up to 100 recent completed episodes; it is not a held-out success curve.
+Episode rewards, lengths, success and collision flags were saved in training CSV files during the original three-seed experiment. The [learning curve](results/training_curve.svg) shows rolling training success across up to 100 recent completed episodes; it is not a held-out success curve.
 
 ## 6. Evaluation Protocol
 
@@ -154,7 +154,7 @@ No test-based checkpoint selection is performed. The comparison reports:
 
 Success, collision, and timeout percentages partition all evaluated episodes. Successful-only means may represent different subsets of scenarios across methods and must be interpreted alongside success rates.
 
-The generated [evaluation report](results/evaluation_report.md) contains the results. The [summary JSON](results/evaluation_summary.json) and [episode CSV](results/evaluation_episodes.csv) retain the numerical evidence. The report also includes mean trained success and sample standard deviation across the three training seeds.
+The original [evaluation report](results/evaluation_report.md) contains the results. The [summary JSON](results/evaluation_summary.json) and [episode CSV](results/evaluation_episodes.csv) retain the numerical evidence. The report also includes mean trained success and sample standard deviation across the three training seeds.
 
 ### Recorded result snapshot
 
@@ -191,7 +191,7 @@ Errors are resampled at every observation, independently for the goal and obstac
 
 All three saved trained policies are tested on the same 100 scenario seeds, giving 900 policy-condition episodes. The noise generator is separate from the environment generator and uses seed `500000 + scenario_seed`. Small and moderate conditions use the same standard-normal draws at each step, scaled to their specified noise levels. This makes reruns reproducible and holds the scenario sampling fixed. It does not provide independent repeated noise trials.
 
-Read [the noise experiment report](results/noise_report.md) and [raw episode measurements](results/noise_evaluation.csv). The clean case is rerun using the current saved models. Model fingerprints are checked before and after evaluation to verify that no learning occurs during this experiment.
+Read [the original noise experiment report](results/noise_report.md) and [raw episode measurements](results/noise_evaluation.csv). The clean case is rerun using the current saved models. Model fingerprints are checked before and after evaluation to verify that no learning occurs during this experiment.
 
 To see the effect visually, run the usual single Python file and tick **Compare observation noise**. The three panels then show the same trained policy with clean, small-noise and moderate-noise inputs. Replay resets both the scenario and noise sequence. Untick the box to return to the original before/after comparison. The visual display shows the true simulated positions; noise affects what the policy receives, not where the objects are drawn.
 
@@ -199,7 +199,7 @@ To see the effect visually, run the usual single Python file and tick **Compare 
 
 Across the three saved policies, clean-input success averaged **94.67%**. Both noisy conditions averaged **94.33%**, a decrease of **0.33 percentage points**. Seeds 7 and 17 retained their success rates of 93% and 99%; seed 27 declined from 92% to 91%. No timeouts occurred in these conditions; unsuccessful episodes ended in collisions.
 
-The measured effect on success was small under these settings. This is a valid experimental result, rather than a reason to claim that noise has no effect or increase it until a dramatic failure appears. Paths and actions can still differ when final outcome counts are similar. More noise repeats and a broader range of scenarios would be needed to assess sensitivity with greater confidence. These values are a historical snapshot; use the generated report for the current saved models after rerunning.
+The measured effect on success was small under these settings. This is a valid experimental result, rather than a reason to claim that noise has no effect or increase it until a dramatic failure appears. Paths and actions can still differ when final outcome counts are similar. More noise repeats and a broader range of scenarios would be needed to assess sensitivity with greater confidence. These values are a historical snapshot. Current reruns write a latest-noise CSV for the selected seed rather than updating the original three-seed report.
 
 ### What this demonstrates
 
@@ -207,34 +207,38 @@ The contribution is the practical work of choosing a limitation, changing one pa
 
 ## 7. Reproduction
 
-All project code is in **`RL_Obstacle_Avoidance.py`**: the environment, controller, training, evaluation, learning-curve export, checks and demo.
+The active script has five main parts: settings and imports, the robot environment, observation noise, training/evaluation, and the visual demo. Automatic research-report generation, metadata export, learning-curve drawing, and startup test routines have been removed from the runnable script.
 
-At the top of that file:
+At the top of `RL_Obstacle_Avoidance.py`:
 
 ```python
 TRAIN_AGENT = False
 EVALUATE_AGENT = False
 RUN_NOISE_TEST = False
+SEED = 7
 TRAINING_STEPS = 300000
-DEMO_SEED = 7
-EVALUATION_EPISODES = 100
+EPISODES = 100
 ```
 
-- **`TRAIN_AGENT = False`:** load the included saved models and show the demo.
-- **`TRAIN_AGENT = True`:** train fresh agents for seeds 7, 17 and 27, replace their generated checkpoints and logs, evaluate them, then show the demo. This starts fresh rather than continuing an existing policy.
-- **`EVALUATE_AGENT = True`:** regenerate the evaluation from saved models without retraining when `TRAIN_AGENT` is false.
-- **`RUN_NOISE_TEST = True`:** compare the current saved trained policies under clean, small-noise and moderate-noise observations, save the experiment data, then show the demo. Keep `TRAIN_AGENT = False` to run this without retraining.
-- **`DEMO_SEED`:** choose 7, 17 or 27 for the displayed before/after or controller comparison.
+- **Normal use:** leave the three switches false to load saved models and show the demo.
+- **Train:** set `TRAIN_AGENT = True` to train one fresh agent for the selected `SEED`, save its initial and final weights, then show the demo. It does not resume previous training or train all three seeds automatically.
+- **Evaluate:** set `EVALUATE_AGENT = True` to print a before/after table and save `results/latest_evaluation_seed_7.csv` for seed 7.
+- **Test noise:** set `RUN_NOISE_TEST = True` to print clean/small/moderate-noise results and save `results/latest_noise_seed_7.csv` for seed 7.
+- **Choose a saved agent:** change `SEED` to 7, 17 or 27. The CSV filename follows that choice.
 
-Run from a terminal in this folder:
+Evaluation is separate from training: turn on its switch if you want to evaluate immediately after retraining. The demo always opens after the selected work. Its checkbox switches between before/after and observation-noise comparisons.
 
 ```powershell
 python RL_Obstacle_Avoidance.py
 ```
 
-Environment checks run automatically before the selected work. Imported as a module, the script does not train or open a window. Models, numerical evidence and the learning curve remain in `results`, because saved model weights and experiment data are outputs rather than extra code files. Copy that folder before retraining if you want to preserve an earlier experiment.
+The script uses nine import statements, each once at the top: standard Python utilities and the existing simulation/learning libraries. PyTorch is used only to limit CPU threads; it does not add a separate hand-written neural-network implementation.
 
-The earlier multi-file implementation and launchers are retained in `archive_previous_layout` for reference. They are no longer the active way to run the project.
+### Existing research evidence
+
+The earlier reports, training logs, metadata and learning curve in `results` are preserved records of the original experiments. The simplified script does not regenerate those reports or plots. Its new evaluations are the `latest_*.csv` files and printed tables for the selected seed. Do not interpret an old three-seed report as a new result after retraining one model. Copy `results` before retraining if preserving the earlier experiment.
+
+The original experiments documented above used all three seeds. To repeat that comparison with this script, select and evaluate each seed separately. The earlier multi-file layout remains in `archive_previous_layout` as a historical backup; it is not required to run the current project.
 
 ## 8. Limitations
 
