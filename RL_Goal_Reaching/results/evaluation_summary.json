@@ -1,0 +1,52 @@
+[
+  {
+    "method": "random",
+    "episodes": 100,
+    "success_rate_pct": 7.0,
+    "mean_steps_all": 237.56,
+    "mean_steps_success": 72.28571428571429,
+    "mean_path_all": 9.524690856099129,
+    "mean_path_success": 2.9506134087698794,
+    "mean_return": -46.327559305184224
+  },
+  {
+    "method": "rule",
+    "episodes": 100,
+    "success_rate_pct": 100.0,
+    "mean_steps_all": 45.07,
+    "mean_steps_success": 45.07,
+    "mean_path_all": 2.2491768100738527,
+    "mean_path_success": 2.2491768100738527,
+    "mean_return": 31.128979465146827
+  },
+  {
+    "method": "ppo_seed_7",
+    "episodes": 100,
+    "success_rate_pct": 100.0,
+    "mean_steps_all": 31.57,
+    "mean_steps_success": 31.57,
+    "mean_path_all": 2.319721107602121,
+    "mean_path_success": 2.319721107602121,
+    "mean_return": 31.622625998157936
+  },
+  {
+    "method": "ppo_seed_17",
+    "episodes": 100,
+    "success_rate_pct": 100.0,
+    "mean_steps_all": 31.66,
+    "mean_steps_success": 31.66,
+    "mean_path_all": 2.333147373294832,
+    "mean_path_success": 2.333147373294832,
+    "mean_return": 31.619110920571043
+  },
+  {
+    "method": "ppo_seed_27",
+    "episodes": 100,
+    "success_rate_pct": 100.0,
+    "mean_steps_all": 31.7,
+    "mean_steps_success": 31.7,
+    "mean_path_all": 2.357196139478685,
+    "mean_path_success": 2.357196139478685,
+    "mean_return": 31.621416879227166
+  }
+]

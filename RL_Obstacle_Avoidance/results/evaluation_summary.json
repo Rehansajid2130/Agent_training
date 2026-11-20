@@ -1,0 +1,98 @@
+[
+  {
+    "method": "random",
+    "episodes": 100,
+    "success_rate_pct": 0.0,
+    "collision_rate_pct": 11.0,
+    "timeout_rate_pct": 89.0,
+    "mean_steps_all": 226.37,
+    "mean_steps_success": null,
+    "mean_path_all": 9.078460284066201,
+    "mean_path_success": null,
+    "mean_return": -38.15756902910189
+  },
+  {
+    "method": "goal_only_rule",
+    "episodes": 100,
+    "success_rate_pct": 11.0,
+    "collision_rate_pct": 89.0,
+    "timeout_rate_pct": 0.0,
+    "mean_steps_all": 25.97,
+    "mean_steps_success": 63.27272727272727,
+    "mean_path_all": 1.702525192666054,
+    "mean_path_success": 3.6904141694849195,
+    "mean_return": 4.334100365841869
+  },
+  {
+    "method": "untrained_seed_7",
+    "episodes": 100,
+    "success_rate_pct": 0.0,
+    "collision_rate_pct": 7.0,
+    "timeout_rate_pct": 93.0,
+    "mean_steps_all": 234.7,
+    "mean_steps_success": null,
+    "mean_path_all": 9.374618424010277,
+    "mean_path_success": null,
+    "mean_return": -68.0153488626207
+  },
+  {
+    "method": "untrained_seed_17",
+    "episodes": 100,
+    "success_rate_pct": 0.0,
+    "collision_rate_pct": 7.0,
+    "timeout_rate_pct": 93.0,
+    "mean_steps_all": 234.68,
+    "mean_steps_success": null,
+    "mean_path_all": 9.357598945713045,
+    "mean_path_success": null,
+    "mean_return": -68.61410362624845
+  },
+  {
+    "method": "untrained_seed_27",
+    "episodes": 100,
+    "success_rate_pct": 0.0,
+    "collision_rate_pct": 7.0,
+    "timeout_rate_pct": 93.0,
+    "mean_steps_all": 234.67,
+    "mean_steps_success": null,
+    "mean_path_all": 9.324085871815681,
+    "mean_path_success": null,
+    "mean_return": -66.52382931750041
+  },
+  {
+    "method": "ppo_seed_7",
+    "episodes": 100,
+    "success_rate_pct": 93.0,
+    "collision_rate_pct": 7.0,
+    "timeout_rate_pct": 0.0,
+    "mean_steps_all": 49.69,
+    "mean_steps_success": 52.03225806451613,
+    "mean_path_all": 3.8047199589729335,
+    "mean_path_success": 3.9883676919629525,
+    "mean_return": 49.02999073735948
+  },
+  {
+    "method": "ppo_seed_17",
+    "episodes": 100,
+    "success_rate_pct": 99.0,
+    "collision_rate_pct": 1.0,
+    "timeout_rate_pct": 0.0,
+    "mean_steps_all": 53.05,
+    "mean_steps_success": 53.41414141414141,
+    "mean_path_all": 4.0322964081049,
+    "mean_path_success": 4.0604008635848485,
+    "mean_return": 52.29237174681592
+  },
+  {
+    "method": "ppo_seed_27",
+    "episodes": 100,
+    "success_rate_pct": 92.0,
+    "collision_rate_pct": 8.0,
+    "timeout_rate_pct": 0.0,
+    "mean_steps_all": 50.47,
+    "mean_steps_success": 52.93478260869565,
+    "mean_path_all": 3.8692528376102477,
+    "mean_path_success": 4.084137661042424,
+    "mean_return": 48.44844792771808
+  }
+]
